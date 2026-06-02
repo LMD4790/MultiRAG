@@ -282,36 +282,6 @@ eval/outputs/
 eval/reports/
 eval/runs/
 ```
-
-## Generated Files Ignored by Git
-
-This repository is kept in a clean from-scratch state. The following generated files and directories should not be committed:
-
-- `.env`
-- `.venv/`
-- `.idea/`
-- `faiss_index/`
-- `datasets/travel_guide.txt`
-- `datasets/gang_ao_pdf/pdf_path/`
-- `GraphRAG/tourist_graphrag/.env`
-- `GraphRAG/tourist_graphrag/input/`
-- `GraphRAG/tourist_graphrag/output/`
-- `GraphRAG/tourist_graphrag/cache/`
-- `GraphRAG/tourist_graphrag/logs/`
-- `olmOCR-*/`
-- `vlm/localworkspace/`
-- `vlm/pdf_path*/`
-- `vlm/result_markdown/`
-- `pure_ocr/image_path/`
-- `pure_ocr/output/`
-- `pure_ocr/pdf_path/`
-- `pure_ocr/result_markdown/`
-- `eval/outputs/`
-- `eval/reports/`
-- `eval/runs/`
-- `__pycache__/`
-- `.ipynb_checkpoints/`
-
 ## Troubleshooting
 
 ### Missing Environment Variables
