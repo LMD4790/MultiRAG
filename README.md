@@ -1,56 +1,64 @@
 # Multimodal Tourism RAG
 
-一个可以从零构建并运行的多模态旅游问答 RAG 项目。项目使用 LangGraph 作为总调度器，按问题类型自动选择普通向量 RAG、GraphRAG 或 OCR/VLM 多模态 RAG。
+A from-scratch multimodal tourism question-answering project built with LangGraph, FAISS, GraphRAG, and OCR/VLM-based PDF processing.
 
-## 你可以用它做什么
+The system uses `System_Agent.py` as the main entry point. It routes each user query to the most suitable specialist agent:
 
-- 查询中国内地旅游基础信息，例如景点、路线、住宿、美食和注意事项。
-- 使用 GraphRAG 做更综合的旅游分析，例如多城市比较、主题总结和景点关系分析。
-- 对港澳台旅游 PDF 资料做 OCR/VLM 解析后，构建多模态检索问答。
-- 通过一个命令行入口统一对话：`python System_Agent.py`。
+- **Naive RAG** for basic mainland China tourism questions.
+- **GraphRAG** for higher-level tourism analysis, comparison, and summarization.
+- **Multimodal RAG** for Hong Kong, Macau, and Taiwan tourism questions based on PDF materials.
 
-## 项目结构
+## Features
+
+- LangGraph-based multi-agent routing.
+- FAISS vector retrieval over tourism CSV data.
+- GraphRAG indexing and query workflow for structured tourism analysis.
+- OCR/VLM pipeline for converting tourism PDFs into Markdown.
+- Command-line interactive QA interface.
+- Offline evaluation scripts.
+
+## Project Structure
 
 ```text
 multimodel_RAG/
-├── System_Agent.py                  # 总入口：LangGraph 多 Agent 路由
-├── config.py                        # 路径与环境变量加载
-├── MultiRAG_environment.yml         # 主环境 YAML
-├── vllm_environment.yml             # OCR/VLM 服务环境 YAML
-├── .env.example                     # 环境变量模板
-├── datasets/
-│   ├── travel_guide.csv             # 内地旅游 CSV 原始数据
-│   └── gang_ao_pdf/                 # 港澳台旅游 PDF 原始资料
-├── Naive_RAG/
-│   ├── create_vectorstore.py        # 从 CSV 构建 FAISS 向量库
-│   └── rag_agent.py                 # 普通 RAG Agent
-├── GraphRAG/
-│   ├── create_graphrag_datasets.py  # 生成 GraphRAG 输入文本
-│   ├── graphrag_agent.py            # GraphRAG Agent
-│   └── tourist_graphrag/
-│       ├── settings.yaml            # GraphRAG 配置
-│       └── prompts/                 # GraphRAG 提示词
-├── vlm/
-│   ├── vlm_multimodel_rag.py        # PDF OCR/VLM 处理与索引构建
-│   └── multi_model_agent.py         # 港澳台多模态 RAG Agent
-├── pure_ocr/                        # OCR 相关实验脚本
-└── eval/                            # 离线评测脚本和样例
+|-- System_Agent.py                  # Main entry: LangGraph multi-agent router
+|-- config.py                        # Project paths and environment loading
+|-- MultiRAG_environment.yml         # Main Conda environment
+|-- vllm_environment.yml             # OCR/VLM service Conda environment
+|-- .env.example                     # Environment variable template
+|-- datasets/
+|   |-- travel_guide.csv             # Raw mainland China tourism CSV data
+|   `-- gang_ao_pdf/                 # Raw Hong Kong, Macau, and Taiwan PDF files
+|-- Naive_RAG/
+|   |-- create_vectorstore.py        # Build FAISS vector store from CSV
+|   `-- rag_agent.py                 # Naive RAG agent
+|-- GraphRAG/
+|   |-- create_graphrag_datasets.py  # Generate GraphRAG input text
+|   |-- graphrag_agent.py            # GraphRAG agent
+|   `-- tourist_graphrag/
+|       |-- settings.yaml            # GraphRAG configuration
+|       `-- prompts/                 # GraphRAG prompts
+|-- vlm/
+|   |-- vlm_multimodel_rag.py        # PDF OCR/VLM processing and index building
+|   `-- multi_model_agent.py         # Multimodal RAG agent
+|-- pure_ocr/                        # OCR experiment scripts
+`-- eval/                            # Offline evaluation scripts and sample cases
 ```
 
-## 从零开始运行
+## Start From Scratch
 
-下面步骤默认你刚克隆项目，仓库中没有任何已生成的索引、OCR 结果或 GraphRAG 输出。
+The following steps assume a clean clone of the repository, with no generated indexes, OCR outputs, or GraphRAG runtime files.
 
-### 1. 创建 Conda 环境
+### 1. Create the Main Conda Environment
 
-优先使用项目自带 YAML：
+Use the provided YAML file:
 
 ```bash
 conda env create -f MultiRAG_environment.yml
 conda activate MultiRAG
 ```
 
-如果你的系统无法完全复现 YAML，也可以使用轻量安装方式：
+If the full YAML environment cannot be reproduced on your platform, use the lightweight fallback:
 
 ```bash
 conda create -n MultiRAG python=3.11 -y
@@ -58,21 +66,21 @@ conda activate MultiRAG
 pip install -r requirements-core.txt
 ```
 
-### 2. 配置 API Key
+### 2. Configure Environment Variables
 
-复制环境变量模板：
+Copy the template file:
 
 ```bash
 cp .env.example .env
 ```
 
-Windows PowerShell：
+On Windows PowerShell:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-编辑 `.env`，填入自己的密钥和模型地址：
+Edit `.env` and fill in your own API keys and model endpoints:
 
 ```env
 DEEPSEEK_API_KEY=your-deepseek-api-key
@@ -83,56 +91,58 @@ GRAPHRAG_MODEL=your-chat-model-name
 VLLM_ENDPOINT=http://localhost:3000/v1/chat/completions
 ```
 
-说明：
+Variable usage:
 
-- `DEEPSEEK_API_KEY`：系统路由和普通对话模型使用。
-- `QWEN_API_KEY`：DashScope Embedding 使用。
-- `GRAPHRAG_API_KEY`、`GRAPHRAG_API_BASE`、`GRAPHRAG_MODEL`：GraphRAG 建图和查询使用。
-- `VLLM_ENDPOINT`：仅在重新处理 PDF OCR/VLM 时需要。
+- `DEEPSEEK_API_KEY`: used by the router and chat agents.
+- `QWEN_API_KEY`: used by DashScope embeddings.
+- `GRAPHRAG_API_KEY`, `GRAPHRAG_API_BASE`, `GRAPHRAG_MODEL`: used by GraphRAG indexing and querying.
+- `VLLM_ENDPOINT`: used only when rebuilding the OCR/VLM PDF pipeline.
 
-## 构建索引
+Do not commit `.env` or real API keys to GitHub.
 
-必须先构建索引，再运行完整系统。
+## Build Indexes
 
-### 1. 构建普通 FAISS 向量库
+You must build the required indexes before running the full system.
+
+### 1. Build the FAISS Vector Store
 
 ```bash
 python Naive_RAG/create_vectorstore.py
 ```
 
-生成结果：
+Generated output:
 
 ```text
 faiss_index/
 ```
 
-### 2. 构建 GraphRAG 数据和索引
+### 2. Build the GraphRAG Index
 
-先把 CSV 转成 GraphRAG 输入文本：
+First generate the GraphRAG input text from the CSV dataset:
 
 ```bash
 python GraphRAG/create_graphrag_datasets.py
 ```
 
-GraphRAG CLI 会读取 `GraphRAG/tourist_graphrag/.env` 中的变量。把项目根目录的 `.env` 复制过去：
+The GraphRAG CLI reads environment variables from `GraphRAG/tourist_graphrag/.env`. Copy your project-level `.env` into that directory:
 
 ```bash
 cp .env GraphRAG/tourist_graphrag/.env
 ```
 
-Windows PowerShell：
+On Windows PowerShell:
 
 ```powershell
 Copy-Item .env GraphRAG/tourist_graphrag/.env
 ```
 
-再执行 GraphRAG 索引：
+Then run GraphRAG indexing:
 
 ```bash
 graphrag index --root GraphRAG/tourist_graphrag
 ```
 
-生成结果：
+Generated outputs:
 
 ```text
 datasets/travel_guide.txt
@@ -142,18 +152,20 @@ GraphRAG/tourist_graphrag/cache/
 GraphRAG/tourist_graphrag/logs/
 ```
 
-### 3. 构建港澳台多模态索引
+### 3. Build the Hong Kong, Macau, and Taiwan Multimodal Index
 
-如果只测试内地普通 RAG 或 GraphRAG，可以先跳过本步骤。若要回答港澳台 PDF 资料相关问题，需要先启动 vLLM OCR 服务，再调用项目脚本处理 PDF。
+You can skip this step if you only want to test mainland China Naive RAG or GraphRAG. To answer Hong Kong, Macau, and Taiwan PDF-based questions, start the vLLM OCR service first, then run the project script that processes PDFs.
 
-OCR/VLM 依赖较重，建议在 Linux + GPU 环境中单独创建服务环境：
+OCR/VLM dependencies are heavy. A Linux machine with GPU support is recommended.
+
+Create the OCR/VLM service environment:
 
 ```bash
 conda env create -f vllm_environment.yml
 conda activate vllm
 ```
 
-如果环境中还没有 olmOCR 模型，先下载模型。下面示例把模型保存到项目根目录：
+If the olmOCR model is not available locally, download it:
 
 ```bash
 modelscope download \
@@ -161,16 +173,16 @@ modelscope download \
   --local_dir ./olmOCR-7B-0725-FP8
 ```
 
-如果系统缺少 PDF 转图片和字体依赖，在 Ubuntu 上可安装：
+If your system is missing PDF-to-image or font dependencies, install them on Ubuntu:
 
 ```bash
 sudo apt-get update
 sudo apt-get install -y poppler-utils ttf-mscorefonts-installer msttcorefonts fonts-crosextra-caladea fonts-crosextra-carlito gsfonts lcdf-typetools
 ```
 
-#### 终端 1：启动 vLLM OCR 服务
+#### Terminal 1: Start the vLLM OCR Service
 
-保持这个终端不要关闭：
+Keep this terminal running:
 
 ```bash
 conda activate vllm
@@ -180,26 +192,26 @@ vllm serve ./olmOCR-7B-0725-FP8 \
   --port 3000
 ```
 
-启动成功后，服务地址为：
+After startup, the service endpoint should be:
 
 ```text
 http://localhost:3000/v1/chat/completions
 ```
 
-确保 `.env` 中有：
+Make sure `.env` contains:
 
 ```env
 VLLM_ENDPOINT=http://localhost:3000/v1/chat/completions
 ```
 
-#### 终端 2：调用 vLLM 服务处理 PDF
+#### Terminal 2: Process PDFs With the vLLM Service
 
 ```bash
 conda activate MultiRAG
 python vlm/vlm_multimodel_rag.py
 ```
 
-常见生成结果：
+Common generated outputs:
 
 ```text
 vlm/localworkspace/
@@ -207,63 +219,63 @@ vlm/pdf_path/
 vlm/result_markdown/
 ```
 
-## 启动问答系统
+## Run the QA System
 
-完成索引构建后运行：
+After building the required indexes, start the interactive QA system:
 
 ```bash
 python System_Agent.py
 ```
 
-终端会提示输入问题。输入 `exit` 退出。
+Type your question in the terminal. Type `exit` to quit.
 
-示例：
+Example questions:
 
 ```text
-北京有哪些适合第一次去的景点？
-从上海出发有哪些旅游景点可以去？
-香港有什么好玩的地方？
-台北有哪些美食推荐？
+What are good attractions for a first trip to Beijing?
+What tourist destinations can I visit from Shanghai?
+What are some fun places to visit in Hong Kong?
+What food is recommended in Taipei?
 ```
 
-## 可选：生成流程图
+## Optional: Generate Workflow Graphs
 
-默认不会生成流程图。如果需要重新生成 LangGraph 流程图：
+Workflow graphs are not generated by default. To regenerate LangGraph workflow images:
 
 ```bash
 DRAW_AGENT_GRAPHS=1 python System_Agent.py
 ```
 
-Windows PowerShell：
+On Windows PowerShell:
 
 ```powershell
 $env:DRAW_AGENT_GRAPHS="1"
 python System_Agent.py
 ```
 
-生成的图片属于中间文件，已被 `.gitignore` 忽略。
+Generated graph images are intermediate files and are ignored by `.gitignore`.
 
-## 离线评测
+## Offline Evaluation
 
-只评测路由：
+Evaluate routing only:
 
 ```bash
 python eval/run_eval.py --cases eval/cases/sample_cases.jsonl --mode router
 ```
 
-调用样例中指定的专家 Agent：
+Call the expected specialist agent from each test case:
 
 ```bash
 python eval/run_eval.py --cases eval/cases/sample_cases.jsonl --mode expected_agent --judge
 ```
 
-调用完整系统：
+Call the full system workflow:
 
 ```bash
 python eval/run_eval.py --cases eval/cases/sample_cases.jsonl --mode system --judge
 ```
 
-评测输出会生成在：
+Evaluation outputs are generated under:
 
 ```text
 eval/outputs/
@@ -271,32 +283,61 @@ eval/reports/
 eval/runs/
 ```
 
-## 常见问题
+## Generated Files Ignored by Git
 
-### 缺少环境变量
+This repository is kept in a clean from-scratch state. The following generated files and directories should not be committed:
 
-确认 `.env` 已经从 `.env.example` 复制，并填写了真实 key。
+- `.env`
+- `.venv/`
+- `.idea/`
+- `faiss_index/`
+- `datasets/travel_guide.txt`
+- `datasets/gang_ao_pdf/pdf_path/`
+- `GraphRAG/tourist_graphrag/.env`
+- `GraphRAG/tourist_graphrag/input/`
+- `GraphRAG/tourist_graphrag/output/`
+- `GraphRAG/tourist_graphrag/cache/`
+- `GraphRAG/tourist_graphrag/logs/`
+- `olmOCR-*/`
+- `vlm/localworkspace/`
+- `vlm/pdf_path*/`
+- `vlm/result_markdown/`
+- `pure_ocr/image_path/`
+- `pure_ocr/output/`
+- `pure_ocr/pdf_path/`
+- `pure_ocr/result_markdown/`
+- `eval/outputs/`
+- `eval/reports/`
+- `eval/runs/`
+- `__pycache__/`
+- `.ipynb_checkpoints/`
 
-### 找不到 FAISS 索引
+## Troubleshooting
 
-先运行：
+### Missing Environment Variables
+
+Make sure `.env` has been copied from `.env.example` and filled with real keys.
+
+### FAISS Index Not Found
+
+Run:
 
 ```bash
 python Naive_RAG/create_vectorstore.py
 ```
 
-### 找不到 GraphRAG parquet 文件
+### GraphRAG Parquet Files Not Found
 
-先运行：
+Run:
 
 ```bash
 python GraphRAG/create_graphrag_datasets.py
 graphrag index --root GraphRAG/tourist_graphrag
 ```
 
-### 港澳台问题无法检索
+### Hong Kong, Macau, or Taiwan Retrieval Does Not Work
 
-请确认已经启动 vLLM OCR 服务，并执行过：
+Make sure the vLLM OCR service is running, then run:
 
 ```bash
 python vlm/vlm_multimodel_rag.py
