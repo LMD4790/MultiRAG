@@ -1,0 +1,42 @@
+.env
+GraphRAG/tourist_graphrag/.env
+__pycache__/
+*.py[cod]
+
+# Local environments and editors
+.venv/
+.idea/
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# Generated indexes and runtime outputs
+faiss_index/
+workspace/
+build_*.png
+multimodel_agenticRAG.png
+datasets/travel_guide.txt
+datasets/gang_ao_pdf/pdf_path/
+
+# GraphRAG generated files
+GraphRAG/tourist_graphrag/input/
+GraphRAG/tourist_graphrag/output/
+GraphRAG/tourist_graphrag/cache/
+GraphRAG/tourist_graphrag/logs/
+
+# OCR/VLM generated files
+olmOCR-*/
+vlm/localworkspace/
+vlm/pdf_path*/
+vlm/result_markdown/
+pure_ocr/image_path/
+pure_ocr/output/
+pure_ocr/pdf_path/
+pure_ocr/result_markdown/
+
+# Evaluation outputs
+eval/outputs/
+eval/reports/
+eval/runs/
+
+# Temporary files
+*.swp

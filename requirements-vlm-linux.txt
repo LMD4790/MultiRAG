@@ -1,0 +1,4 @@
+# Native Windows is not a good target for this stack because olmOCR pulls vLLM.
+# Install this file only in Linux/WSL2/Linux GPU servers.
+olmocr[gpu]
+
